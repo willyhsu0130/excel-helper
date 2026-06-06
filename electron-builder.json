@@ -1,0 +1,21 @@
+{
+    "appId": "com.willyhsu.excelhelper",
+    "productName": "ExcelHelper",
+    "extraResources": ["dist-electron/preload.ts"],
+    "directories": {
+        "output": "out"
+    },
+    "files": [
+        "dist-electron/**/*",
+        "dist-react/**/*"
+    ],
+    "mac": {
+        "target": ["dmg"]
+    },
+    "win": {
+        "target": ["nsis"]
+    },
+    "linux": {
+        "target": ["AppImage"]
+    }
+}
