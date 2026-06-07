@@ -38,13 +38,14 @@ export const Index = () => {
 
             // Call the IPC handler we built in your backend main process
             const response = await window.electronAPI.readExcelForm(nativeFilePath);
-            if (response.success) {
-                navigator("/form")
-            }
+          
             if (response.success) {
                 setStatus({ message: `Successfully loaded spreadsheet data!`, error: false });
-                console.log('Workbook Data:', response.workbookData);
+    
+                navigator("/form")
+
             } else {
+                console.log("error")
                 setStatus({ message: `Error parsing file: ${response.error}`, error: true });
             }
         } catch (err) {

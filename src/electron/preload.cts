@@ -9,7 +9,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
     readExcelForm: (filePath: string) => ipcRenderer.invoke('read-excel-data', filePath),
 
-    getNativePath: (file: File) => webUtils.getPathForFile(file)
+    getNativePath: (file: File) => webUtils.getPathForFile(file),
+
+    getActiveExcelData: () => ipcRenderer.invoke('get-active-excel-data'),
 });
 
 export { };

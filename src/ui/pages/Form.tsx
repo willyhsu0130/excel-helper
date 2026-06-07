@@ -1,10 +1,11 @@
 // src/ui/pages/Form.tsx
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { fields } from '../../electron/excel/settings';
 import type { fieldType } from '../../electron/excel/types/fields'; // Import the type for explicit array validation
+import { Link } from 'react-router-dom';
 
 export const Form = () => {
-    // Cast the imported settings array locally to clear any loop property type inferences
+
     const typedFields = fields as fieldType[];
 
     // 1. Helper to generate a blank default state object dynamically based on fields setup
@@ -18,6 +19,42 @@ export const Form = () => {
     // 2. Initialize dynamic form data state dictionary
     const [formData, setFormData] = useState<Record<string, string>>(createInitialState);
     const [status, setStatus] = useState({ message: '', error: false });
+
+    // Inside src/ui/pages/Form.tsx
+
+    useEffect(() => {
+
+        const loadCachedSpreadsheetData = async () => {
+            try {
+                // Ask the background memory for the last file's values
+                const incomingWorkbookData = await window.electronAPI.getActiveExcelData();
+
+                // If there's data cached back there, populate the form inputs instantly!
+                if (incomingWorkbookData) {
+                    const updatedState: Record<string, string> = {};
+
+                    typedFields.forEach((field) => {
+                        const extractedValue = incomingWorkbookData[field.fieldName];
+
+                        if (extractedValue instanceof Date) {
+                            updatedState[field.fieldName] = extractedValue.toISOString().split('T')[0];
+                        } else if (extractedValue !== null && extractedValue !== undefined) {
+                            updatedState[field.fieldName] = String(extractedValue);
+                        } else {
+                            updatedState[field.fieldName] = '';
+                        }
+                    });
+
+                    setFormData(updatedState);
+                    setStatus({ message: 'Loaded current spreadsheet values from background cache!', error: false });
+                }
+            } catch (err) {
+                console.error("Failed to pull background workbook state data:", err);
+            }
+        };
+
+        loadCachedSpreadsheetData();
+    }, [typedFields]); // Notice we don't need window event listeners anymore!
 
     // 3. Dynamically update key matching the input name token
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -72,6 +109,7 @@ export const Form = () => {
 
     return (
         <div style={{ maxWidth: '500px', margin: '20px auto', fontFamily: 'sans-serif' }}>
+            <Link to="/">GO back </Link>
             <h2>Form</h2>
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
 

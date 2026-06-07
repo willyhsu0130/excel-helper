@@ -6,6 +6,7 @@ import { readSpecificExcelFields, writeSpecificExcelFields } from './excel/helpe
 import { fields } from './excel/settings.js';
 
 let activeExcelFilePath: string | null = null;
+let activeExcelData: Record<string, string | number | Date | null> | null = null;
 
 app.on("ready", () => {
     const mainWindow = new BrowserWindow({
@@ -51,14 +52,11 @@ ipcMain.handle('submit-form', async (_event, data: Record<string, string | numbe
 
 ipcMain.handle('read-excel-data', async (_event, filePath) => {
     try {
-        // 1. Log the incoming local path to verify it's hitting the backend
         activeExcelFilePath = filePath
         console.log('Main process parsing Excel file from path:', filePath);
-
-        // 2. Call your ExcelJS helper to read and parse the workbook rows
         const extractedWorkbookData = await readSpecificExcelFields(filePath, fields);
-
-        // 3. Return the parsed spreadsheet data object back to React!
+        activeExcelData = extractedWorkbookData;
+        console.log(extractedWorkbookData)
         return {
             success: true,
             workbookData: extractedWorkbookData
@@ -72,3 +70,7 @@ ipcMain.handle('read-excel-data', async (_event, filePath) => {
         return { success: false, error: errorMessage };
     }
 })
+
+ipcMain.handle('get-active-excel-data', async () => {
+    return activeExcelData; 
+});
